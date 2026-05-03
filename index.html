@@ -265,7 +265,7 @@ async function addTask() {
         'anthropic-dangerous-direct-browser-calls': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 200,
         system: 'Je bent een Eisenhower Matrix assistent. Klassificeer de taak:\nq1 = Belangrijk EN Urgent\nq2 = Belangrijk, NIET Urgent\nq3 = Niet Belangrijk, Urgent\nq4 = Niet Belangrijk, Niet Urgent\nReageer ALLEEN met JSON zonder markdown: {"quadrant":"q1","task":"beknopte taak"}',
         messages: [{ role: 'user', content: text }]
