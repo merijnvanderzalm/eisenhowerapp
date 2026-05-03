@@ -10,650 +10,445 @@
 <link rel="manifest" href="manifest.json"/>
 <title>Mijn Matrix</title>
 <style>
-/* ── Reset & base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --black:   #1C1C1E;
-  --dark2:   #2C2C2E;
-  --dark3:   #3A3A3C;
-  --bg:      #F2F2F7;
-  --card:    #FFFFFF;
-  --border:  #E5E5EA;
-  --text:    #1C1C1E;
-  --muted:   #8E8E93;
-  --red:     #FF3B30;
-  --blue:    #007AFF;
-  --orange:  #FF9500;
-  --gray:    #8E8E93;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --black:  #1C1C1E;
+  --dark2:  #2C2C2E;
+  --dark3:  #3A3A3C;
+  --bg:     #F2F2F7;
+  --card:   #FFFFFF;
+  --border: #E5E5EA;
+  --text:   #1C1C1E;
+  --muted:  #8E8E93;
+  --red:    #FF3B30;
+  --blue:   #007AFF;
+  --orange: #FF9500;
+  --gray:   #8E8E93;
+  --st: env(safe-area-inset-top, 0px);
+  --sb: env(safe-area-inset-bottom, 0px);
 }
 html, body {
   height: 100%;
   background: var(--bg);
-  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
 
-/* ── Layout ── */
-#app {
+/* KEY SCREEN */
+#keyScreen {
+  position: fixed; inset: 0;
+  background: var(--black);
+  z-index: 500;
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
-  max-width: 430px;
-  margin: 0 auto;
-}
-
-/* ── Header ── */
-header {
-  background: var(--black);
-  padding: calc(var(--safe-top) + 18px) 20px 20px;
-  flex-shrink: 0;
-}
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
-}
-.header-title { color: #fff; font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
-.header-sub   { color: #8E8E93; font-size: 13px; margin-top: 2px; font-weight: 400; }
-
-.archive-btn {
-  background: var(--dark3);
-  border: none;
-  color: #fff;
-  font-size: 12px;
-  font-family: inherit;
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-/* ── Input ── */
-.input-row {
-  display: flex;
-  gap: 10px;
   align-items: center;
+  justify-content: center;
+  padding: calc(var(--st) + 32px) 28px calc(var(--sb) + 32px);
 }
-.input-wrap {
-  flex: 1;
-  background: var(--dark2);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  height: 46px;
+#keyScreen.hidden { display: none; }
+.ks-logo  { font-size: 52px; margin-bottom: 22px; }
+.ks-title { color: #fff; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 8px; letter-spacing: -.4px; }
+.ks-sub   { color: var(--muted); font-size: 14px; text-align: center; line-height: 1.5; margin-bottom: 32px; }
+.ks-label { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; align-self: flex-start; margin-bottom: 8px; width: 100%; }
+#keyInput {
+  width: 100%; background: var(--dark2);
+  border: 1.5px solid var(--dark3); border-radius: 12px;
+  color: #fff; font-size: 14px; font-family: 'Menlo', monospace;
+  padding: 14px 16px; outline: none; margin-bottom: 10px;
 }
-.input-wrap input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-size: 15px;
-  font-family: inherit;
-  caret-color: #fff;
+#keyInput:focus { border-color: var(--blue); }
+#keyError { color: #FF6B6B; font-size: 13px; margin-bottom: 10px; display: none; }
+.ks-hint { color: #636366; font-size: 12px; text-align: center; margin-bottom: 28px; line-height: 1.6; }
+.ks-hint a { color: var(--blue); text-decoration: none; }
+#keySaveBtn {
+  width: 100%; background: var(--red); color: #fff; border: none;
+  border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
 }
-.input-wrap input::placeholder { color: #636366; }
+#keySaveBtn:active { opacity: .8; }
 
-.add-btn {
-  width: 46px; height: 46px;
-  background: var(--red);
-  border: none; border-radius: 12px;
-  color: #fff; font-size: 24px; line-height: 1;
-  cursor: pointer; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity .15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.add-btn:active { opacity: .75; }
-.add-btn:disabled { opacity: .4; }
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
+/* APP */
+#app { display: flex; flex-direction: column; min-height: 100dvh; max-width: 430px; margin: 0 auto; }
+header { background: var(--black); padding: calc(var(--st) + 18px) 20px 20px; flex-shrink: 0; }
+.hrow { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; }
+.htitle { color: #fff; font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+.hsub   { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.hbtns  { display: flex; gap: 8px; flex-shrink: 0; margin-top: 2px; }
+.hbtn { background: var(--dark3); border: none; color: #fff; font-size: 12px; font-family: inherit; padding: 6px 12px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+.hbtn-icon { background: var(--dark3); border: none; color: #fff; font-size: 14px; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.irow { display: flex; gap: 10px; align-items: center; }
+.iwrap { flex: 1; background: var(--dark2); border-radius: 12px; display: flex; align-items: center; padding: 0 14px; height: 46px; }
+.iwrap input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; font-family: inherit; caret-color: #fff; }
+.iwrap input::placeholder { color: #636366; }
+#addBtn { width: 46px; height: 46px; background: var(--red); border: none; border-radius: 12px; color: #fff; font-size: 24px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+#addBtn:active { opacity: .75; }
+#addBtn:disabled { opacity: .4; }
+.spin { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Matrix ── */
-.matrix-wrap {
-  flex: 1;
-  padding: 14px 14px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.axis-h {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 2px;
-}
-.axis-label { font-size: 11px; color: var(--muted); font-weight: 400; letter-spacing: .2px; }
+.mwrap { flex: 1; padding: 14px 14px 0; display: flex; flex-direction: column; gap: 10px; }
+.axrow { display: flex; justify-content: space-between; padding: 0 2px; }
+.axlbl { font-size: 11px; color: var(--muted); }
+.matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+.quad { background: var(--card); border-radius: 16px; padding: 14px 12px; min-height: 150px; transition: background .15s; }
+.quad.over { background: #EBEBF0; }
+.qh { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
+.qdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.q1 .qdot { background: var(--red); }
+.q2 .qdot { background: var(--blue); }
+.q3 .qdot { background: var(--orange); }
+.q4 .qdot { background: var(--gray); }
+.qname { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
+.tlist { display: flex; flex-direction: column; gap: 8px; }
+.titem { display: flex; align-items: flex-start; gap: 8px; padding: 2px 0; cursor: grab; user-select: none; -webkit-tap-highlight-color: transparent; }
+.titem.dragging { opacity: .3; }
+.cb { width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all .15s; background: #fff; }
+.cb.on { background: var(--muted); border-color: var(--muted); color: #fff; }
+.ttxt { flex: 1; font-size: 14px; line-height: 1.4; color: var(--text); word-break: break-word; }
+.ttxt.done { text-decoration: line-through; color: var(--muted); }
+.delbtn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 2px; line-height: 1; -webkit-tap-highlight-color: transparent; }
+.empty { font-size: 12px; color: #C7C7CC; text-align: center; margin-top: 6px; }
+footer { padding: 10px 14px calc(var(--sb) + 10px); display: flex; justify-content: space-between; }
+.flbl { font-size: 11px; color: var(--muted); }
 
-.matrix {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 10px;
-  flex: 1;
-}
+.toast { position: fixed; bottom: calc(var(--sb) + 72px); left: 50%; transform: translateX(-50%); background: #333; color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 20px; white-space: nowrap; animation: fadeup .25s; z-index: 200; }
+@keyframes fadeup { from { opacity: 0; transform: translateX(-50%) translateY(6px); } }
 
-.quadrant {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 14px 12px;
-  min-height: 150px;
-  transition: background .15s;
-  position: relative;
-}
-.quadrant.drag-over { background: #F0F0F5; }
-
-.q-head {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 12px;
-}
-.q-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.q1 .q-dot { background: var(--red); }
-.q2 .q-dot { background: var(--blue); }
-.q3 .q-dot { background: var(--orange); }
-.q4 .q-dot { background: var(--gray); }
-
-.q-name {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-}
-
-/* ── Task items ── */
-.task-list { display: flex; flex-direction: column; gap: 8px; }
-
-.task-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 2px 0;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  cursor: grab;
-}
-.task-item.dragging { opacity: .3; }
-
-.cb {
-  width: 18px; height: 18px;
-  border: 1.5px solid var(--border);
-  border-radius: 4px;
-  flex-shrink: 0;
-  margin-top: 1px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
-  background: #fff;
-}
-.cb.checked {
-  background: var(--muted);
-  border-color: var(--muted);
-  color: #fff;
-  font-size: 11px;
-}
-
-.task-text {
-  flex: 1;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--text);
-  word-break: break-word;
-}
-.task-text.done {
-  text-decoration: line-through;
-  color: var(--muted);
-}
-
-.del-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0 2px;
-  flex-shrink: 0;
-  line-height: 1;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.empty-hint {
-  font-size: 12px;
-  color: #C7C7CC;
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* ── Footer ── */
-footer {
-  padding: 10px 14px calc(var(--safe-bot) + 10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.foot-label { font-size: 11px; color: var(--muted); }
-.foot-hint  { font-size: 11px; color: #C7C7CC; font-style: italic; }
-
-/* ── Error toast ── */
-.toast {
-  position: fixed;
-  bottom: calc(var(--safe-bot) + 70px);
-  left: 50%; transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  font-size: 13px;
-  padding: 10px 18px;
-  border-radius: 20px;
-  white-space: nowrap;
-  animation: fadeup .3s;
-  z-index: 100;
-}
-@keyframes fadeup { from { opacity:0; transform: translateX(-50%) translateY(8px); } }
-
-/* ── Archive overlay ── */
-.overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 50;
-  display: flex;
-  align-items: flex-end;
-}
-.sheet {
-  background: var(--card);
-  border-radius: 20px 20px 0 0;
-  width: 100%;
-  max-height: 75dvh;
-  padding: calc(16px) 20px calc(var(--safe-bot) + 20px);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  animation: slideup .25s ease;
-}
-@keyframes slideup { from { transform: translateY(100%); } }
-.sheet-handle {
-  width: 36px; height: 4px;
-  background: #C7C7CC;
-  border-radius: 2px;
-  margin: 0 auto 16px;
-}
-.sheet-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
-.sheet-list { overflow-y: auto; flex: 1; }
-.arc-item {
-  display: flex; align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  gap: 10px;
-}
-.arc-item:last-child { border-bottom: none; }
-.arc-badge {
-  font-size: 11px; font-weight: 600;
-  padding: 3px 8px; border-radius: 10px;
-  flex-shrink: 0;
-}
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: flex-end; }
+.sheet { background: var(--card); border-radius: 20px 20px 0 0; width: 100%; max-height: 75dvh; padding: 16px 20px calc(var(--sb) + 20px); display: flex; flex-direction: column; animation: up .25s ease; }
+@keyframes up { from { transform: translateY(100%); } }
+.shandle { width: 36px; height: 4px; background: #C7C7CC; border-radius: 2px; margin: 0 auto 16px; }
+.stitle { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+.slist { overflow-y: auto; flex: 1; }
+.aitem { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.aitem:last-child { border-bottom: none; }
+.abadge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 10px; flex-shrink: 0; }
 .b1 { background: #FFE5E5; color: var(--red); }
 .b2 { background: #E5F0FF; color: var(--blue); }
 .b3 { background: #FFF3E0; color: var(--orange); }
 .b4 { background: #F2F2F7; color: var(--gray); }
-.arc-text { flex: 1; font-size: 14px; color: var(--text); }
-.arc-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+.atxt { flex: 1; font-size: 14px; }
+.adel { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; }
 
-/* ── Drag ghost ── */
-#ghost {
-  position: fixed;
-  pointer-events: none;
-  z-index: 200;
-  background: var(--card);
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-size: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  max-width: 170px;
-  opacity: 0;
-  transition: opacity .1s;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.4;
-}
-#ghost.visible { opacity: .9; }
+#ghost { position: fixed; pointer-events: none; z-index: 300; background: var(--card); border-radius: 10px; padding: 8px 12px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.18); max-width: 160px; opacity: 0; transition: opacity .1s; word-break: break-word; line-height: 1.4; }
+#ghost.show { opacity: .9; }
 </style>
 </head>
 <body>
+
+<div id="keyScreen">
+  <div class="ks-logo">🧠</div>
+  <div class="ks-title">Verbind met Claude</div>
+  <div class="ks-sub">De app gebruikt de Claude API om taken automatisch in het juiste kwadrant te plaatsen.</div>
+  <div class="ks-label">Jouw Anthropic API key</div>
+  <input id="keyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false"/>
+  <div id="keyError">Key moet beginnen met sk-ant-…</div>
+  <div class="ks-hint">Vind je key op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a><br/>Wordt alleen lokaal op dit apparaat opgeslagen.</div>
+  <button id="keySaveBtn">Opslaan &amp; doorgaan →</button>
+</div>
+
 <div id="app">
   <header>
-    <div class="header-row">
+    <div class="hrow">
       <div>
-        <div class="header-title">Mijn matrix</div>
-        <div class="header-sub">Typ een taak en vermeld urgentie/belang</div>
+        <div class="htitle">Mijn matrix</div>
+        <div class="hsub">Typ een taak en vermeld urgentie/belang</div>
       </div>
-      <button class="archive-btn" onclick="openArchive()">📦 Archief</button>
+      <div class="hbtns">
+        <button class="hbtn" id="archiveBtn">📦 Archief</button>
+        <button class="hbtn-icon" id="settingsBtn">⚙️</button>
+      </div>
     </div>
-    <div class="input-row">
-      <div class="input-wrap">
-        <input id="taskInput" type="text" inputmode="text"
-               placeholder="bijv. 'belasting aangifte, urgent en belangrijk'"
-               onkeydown="if(event.key==='Enter')addTask()"/>
+    <div class="irow">
+      <div class="iwrap">
+        <input id="taskInput" type="text" inputmode="text" placeholder="bijv. 'belasting aangifte, urgent en belangrijk'"/>
       </div>
-      <button class="add-btn" id="addBtn" onclick="addTask()">
-        <span id="addIcon">+</span>
-      </button>
+      <button id="addBtn"><span id="addIcon">+</span></button>
     </div>
   </header>
-
-  <div class="matrix-wrap">
-    <div class="axis-h">
-      <span class="axis-label">← Niet urgent</span>
-      <span class="axis-label">Urgent →</span>
+  <div class="mwrap">
+    <div class="axrow">
+      <span class="axlbl">← Niet urgent</span>
+      <span class="axlbl">Urgent →</span>
     </div>
     <div class="matrix">
-      <div class="quadrant q1" id="drop-q1">
-        <div class="q-head"><div class="q-dot"></div><span class="q-name">Doe nu</span></div>
-        <div class="task-list" id="list-q1"></div>
-      </div>
-      <div class="quadrant q2" id="drop-q2">
-        <div class="q-head"><div class="q-dot"></div><span class="q-name">Plan</span></div>
-        <div class="task-list" id="list-q2"></div>
-      </div>
-      <div class="quadrant q3" id="drop-q3">
-        <div class="q-head"><div class="q-dot"></div><span class="q-name">Delegeer</span></div>
-        <div class="task-list" id="list-q3"></div>
-      </div>
-      <div class="quadrant q4" id="drop-q4">
-        <div class="q-head"><div class="q-dot"></div><span class="q-name">Schrap</span></div>
-        <div class="task-list" id="list-q4"></div>
-      </div>
+      <div class="quad q1" id="dq1"><div class="qh"><div class="qdot"></div><span class="qname">Doe nu</span></div><div class="tlist" id="lq1"></div></div>
+      <div class="quad q2" id="dq2"><div class="qh"><div class="qdot"></div><span class="qname">Plan</span></div><div class="tlist" id="lq2"></div></div>
+      <div class="quad q3" id="dq3"><div class="qh"><div class="qdot"></div><span class="qname">Delegeer</span></div><div class="tlist" id="lq3"></div></div>
+      <div class="quad q4" id="dq4"><div class="qh"><div class="qdot"></div><span class="qname">Schrap</span></div><div class="tlist" id="lq4"></div></div>
     </div>
   </div>
-
   <footer>
-    <span class="foot-label">← Niet urgent · Urgent →</span>
-    <span class="foot-label">↑ Belang</span>
+    <span class="flbl">← Niet urgent · Urgent →</span>
+    <span class="flbl">↑ Belang</span>
   </footer>
 </div>
 
-<!-- Drag ghost -->
 <div id="ghost"></div>
 
-<!-- Archive overlay (hidden) -->
-<div class="overlay" id="overlay" style="display:none" onclick="closeArchive()">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">📦 Archief</div>
-    <div class="sheet-list" id="archiveList"></div>
+<div id="overlay" class="overlay" style="display:none">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div class="stitle">📦 Archief</div>
+    <div class="slist" id="arcList"></div>
   </div>
 </div>
 
 <script>
-/* ── Data ── */
-const KEY = 'eisenhower_v2';
+'use strict';
+
+const TASKS_KEY = 'eis_tasks_v3';
+const API_KEY   = 'eis_apikey';
 const META = {
-  q1: { label: 'Doe nu',    cls: 'b1' },
-  q2: { label: 'Plan',      cls: 'b2' },
-  q3: { label: 'Delegeer',  cls: 'b3' },
-  q4: { label: 'Schrap',    cls: 'b4' },
+  q1: { label: 'Doe nu',   cls: 'b1' },
+  q2: { label: 'Plan',     cls: 'b2' },
+  q3: { label: 'Delegeer', cls: 'b3' },
+  q4: { label: 'Schrap',   cls: 'b4' },
 };
 
 let tasks = [];
-try { tasks = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { tasks = []; }
+try { tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]'); } catch (e) { tasks = []; }
 
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch {}
+function getApiKey() { return localStorage.getItem(API_KEY) || ''; }
+
+function showKeyScreen() {
+  document.getElementById('keyInput').value = getApiKey();
+  document.getElementById('keyScreen').classList.remove('hidden');
+}
+function hideKeyScreen() {
+  document.getElementById('keyScreen').classList.add('hidden');
 }
 
-/* ── Add task via Claude API ── */
-async function addTask() {
-  const input = document.getElementById('taskInput');
-  const text = input.value.trim();
-  if (!text) return;
+document.getElementById('keySaveBtn').addEventListener('click', function () {
+  var val = document.getElementById('keyInput').value.trim();
+  var err = document.getElementById('keyError');
+  if (!val.startsWith('sk-')) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  localStorage.setItem(API_KEY, val);
+  hideKeyScreen();
+});
 
-  const btn = document.getElementById('addBtn');
-  const icon = document.getElementById('addIcon');
+document.getElementById('keyInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('keySaveBtn').click();
+});
+
+document.getElementById('settingsBtn').addEventListener('click', showKeyScreen);
+
+function save() { try { localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); } catch (e) {} }
+
+document.getElementById('taskInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') addTask();
+});
+document.getElementById('addBtn').addEventListener('click', addTask);
+
+async function addTask() {
+  var input = document.getElementById('taskInput');
+  var text = input.value.trim();
+  if (!text) return;
+  var apiKey = getApiKey();
+  if (!apiKey) { showKeyScreen(); return; }
+
+  var btn  = document.getElementById('addBtn');
+  var icon = document.getElementById('addIcon');
   btn.disabled = true;
-  icon.innerHTML = '<div class="spinner"></div>';
+  icon.innerHTML = '<div class="spin"></div>';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 200,
-        system: `Je bent een Eisenhower Matrix assistent. Klassificeer de taak:
-q1 = Belangrijk EN Urgent (deadline, crisis, blocker)
-q2 = Belangrijk, NIET Urgent (strategie, groei, preventie)
-q3 = Niet Belangrijk, Urgent (andermans deadline, sommige mails)
-q4 = Niet Belangrijk, Niet Urgent (nice-to-have, vermijdingsgedrag)
-Reageer ALLEEN met JSON, geen markdown: {"quadrant":"q1","task":"beknopte taak in het Nederlands"}`,
+        system: 'Je bent een Eisenhower Matrix assistent. Klassificeer de taak:\nq1 = Belangrijk EN Urgent\nq2 = Belangrijk, NIET Urgent\nq3 = Niet Belangrijk, Urgent\nq4 = Niet Belangrijk, Niet Urgent\nReageer ALLEEN met JSON zonder markdown: {"quadrant":"q1","task":"beknopte taak"}',
         messages: [{ role: 'user', content: text }]
       })
     });
 
-    const data = await res.json();
-    const raw = (data.content || []).map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(raw);
+    if (res.status === 401) { showKeyScreen(); toast('API key ongeldig — pas hem aan'); return; }
 
-    tasks.push({
-      id: Date.now().toString(),
-      text: parsed.task || text,
-      quadrant: ['q1','q2','q3','q4'].includes(parsed.quadrant) ? parsed.quadrant : 'q2',
-      done: false,
-      archived: false,
-    });
+    var data = await res.json();
+    var raw  = (data.content || []).map(function(b) { return b.text || ''; }).join('').replace(/```json|```/g, '').trim();
+    var p    = JSON.parse(raw);
+    var q    = ['q1','q2','q3','q4'].indexOf(p.quadrant) >= 0 ? p.quadrant : 'q2';
+
+    tasks.push({ id: String(Date.now()), text: p.task || text, quadrant: q, done: false, archived: false });
     save();
     input.value = '';
     render();
   } catch (e) {
-    showToast('Kon taak niet verwerken — probeer opnieuw');
+    toast('Kon taak niet verwerken — controleer verbinding');
   }
 
   btn.disabled = false;
   icon.textContent = '+';
 }
 
-/* ── CRUD ── */
 function toggleDone(id) {
-  tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+  tasks = tasks.map(function(t) { return t.id === id ? Object.assign({}, t, { done: !t.done }) : t; });
   save(); render();
 }
 function archiveTask(id) {
-  tasks = tasks.map(t => t.id === id ? { ...t, archived: true } : t);
+  tasks = tasks.map(function(t) { return t.id === id ? Object.assign({}, t, { archived: true }) : t; });
   save(); render();
   if (document.getElementById('overlay').style.display !== 'none') renderArchive();
 }
 function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
+  tasks = tasks.filter(function(t) { return t.id !== id; });
   save(); render();
   if (document.getElementById('overlay').style.display !== 'none') renderArchive();
 }
 function moveTask(id, q) {
-  tasks = tasks.map(t => t.id === id ? { ...t, quadrant: q } : t);
+  tasks = tasks.map(function(t) { return t.id === id ? Object.assign({}, t, { quadrant: q }) : t; });
   save(); render();
 }
 
-/* ── Archive sheet ── */
-function openArchive() {
+document.getElementById('archiveBtn').addEventListener('click', function () {
   renderArchive();
   document.getElementById('overlay').style.display = 'flex';
-}
-function closeArchive() {
-  document.getElementById('overlay').style.display = 'none';
-}
+});
+document.getElementById('overlay').addEventListener('click', function (e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
 function renderArchive() {
-  const archived = tasks.filter(t => t.archived);
-  const list = document.getElementById('archiveList');
-  if (!archived.length) {
-    list.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:12px 0;">Geen gearchiveerde taken.</p>';
-    return;
-  }
-  list.innerHTML = archived.map(t => `
-    <div class="arc-item">
-      <span class="arc-badge ${META[t.quadrant]?.cls || 'b4'}">${META[t.quadrant]?.label || t.quadrant}</span>
-      <span class="arc-text">${esc(t.text)}</span>
-      <button class="arc-del" onclick="deleteTask('${t.id}')">✕</button>
-    </div>`).join('');
+  var arc  = tasks.filter(function(t) { return t.archived; });
+  var list = document.getElementById('arcList');
+  list.innerHTML = arc.length
+    ? arc.map(function(t) {
+        return '<div class="aitem"><span class="abadge ' + (META[t.quadrant] ? META[t.quadrant].cls : 'b4') + '">' + (META[t.quadrant] ? META[t.quadrant].label : t.quadrant) + '</span><span class="atxt">' + esc(t.text) + '</span><button class="adel" onclick="deleteTask(\'' + t.id + '\')">✕</button></div>';
+      }).join('')
+    : '<p style="color:var(--muted);font-size:14px;padding:12px 0">Geen gearchiveerde taken.</p>';
 }
 
-/* ── Toast ── */
-let toastTimer;
-function showToast(msg) {
+var toastTimer;
+function toast(msg) {
   clearTimeout(toastTimer);
-  document.querySelectorAll('.toast').forEach(e => e.remove());
-  const el = document.createElement('div');
+  document.querySelectorAll('.toast').forEach(function(e) { e.remove(); });
+  var el = document.createElement('div');
   el.className = 'toast';
   el.textContent = msg;
   document.body.appendChild(el);
-  toastTimer = setTimeout(() => el.remove(), 2800);
+  toastTimer = setTimeout(function() { el.remove(); }, 2800);
 }
 
-/* ── Render ── */
 function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function render() {
-  const active = tasks.filter(t => !t.archived);
-  ['q1','q2','q3','q4'].forEach(q => {
-    const list = document.getElementById('list-' + q);
-    const qt = active.filter(t => t.quadrant === q);
-    if (!qt.length) {
-      list.innerHTML = '<div class="empty-hint">Leeg</div>';
-      return;
-    }
-    list.innerHTML = qt.map(t => `
-      <div class="task-item" id="ti-${t.id}" data-id="${t.id}">
-        <div class="cb ${t.done ? 'checked' : ''}" onclick="toggleDone('${t.id}')">
-          ${t.done ? '✓' : ''}
-        </div>
-        <span class="task-text ${t.done ? 'done' : ''}">${esc(t.text)}</span>
-        <button class="del-btn" onclick="archiveTask('${t.id}')">×</button>
-      </div>`).join('');
+  var active = tasks.filter(function(t) { return !t.archived; });
+  ['q1','q2','q3','q4'].forEach(function(q) {
+    var el = document.getElementById('l' + q);
+    var qt = active.filter(function(t) { return t.quadrant === q; });
+    el.innerHTML = qt.length
+      ? qt.map(function(t) {
+          return '<div class="titem" data-id="' + t.id + '" draggable="true">' +
+            '<div class="cb ' + (t.done ? 'on' : '') + '" onclick="toggleDone(\'' + t.id + '\')">' + (t.done ? '✓' : '') + '</div>' +
+            '<span class="ttxt ' + (t.done ? 'done' : '') + '">' + esc(t.text) + '</span>' +
+            '<button class="delbtn" onclick="archiveTask(\'' + t.id + '\')">×</button>' +
+          '</div>';
+        }).join('')
+      : '<div class="empty">Leeg</div>';
   });
   attachTouchDrag();
 }
 
-/* ── Touch drag & drop ── */
-const ghost = document.getElementById('ghost');
-let dragState = null;
+document.addEventListener('dragstart', function(e) {
+  var item = e.target.closest && e.target.closest('.titem');
+  if (item) e.dataTransfer.setData('text/plain', item.dataset.id);
+});
+['q1','q2','q3','q4'].forEach(function(q) {
+  var el = document.getElementById('d' + q);
+  el.addEventListener('dragover',  function(e) { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', function() { el.classList.remove('over'); });
+  el.addEventListener('drop', function(e) {
+    e.preventDefault(); el.classList.remove('over');
+    var id = e.dataTransfer.getData('text/plain');
+    if (id) moveTask(id, q);
+  });
+});
+
+var ghost = document.getElementById('ghost');
 
 function attachTouchDrag() {
-  document.querySelectorAll('.task-item').forEach(el => {
+  document.querySelectorAll('.titem').forEach(function(el) {
     el.addEventListener('touchstart', onTouchStart, { passive: true });
   });
 }
 
 function onTouchStart(e) {
-  const item = e.currentTarget;
-  const id = item.dataset.id;
-  const textEl = item.querySelector('.task-text');
-  const text = textEl ? textEl.textContent : '';
+  var item = e.currentTarget;
+  var id   = item.dataset.id;
+  var txt  = (item.querySelector('.ttxt') || {}).textContent || '';
+  var sx   = e.touches[0].clientX;
+  var sy   = e.touches[0].clientY;
+  var active = false;
 
-  const startX = e.touches[0].clientX;
-  const startY = e.touches[0].clientY;
-  let activated = false;
-
-  const timer = setTimeout(() => {
-    activated = true;
+  var timer = setTimeout(function() {
+    active = true;
     item.classList.add('dragging');
-    ghost.textContent = text;
-    ghost.classList.add('visible');
-    positionGhost(startX, startY);
-    dragState = { id, item };
-    highlightDrop(null);
-  }, 350);
+    ghost.textContent = txt;
+    ghost.classList.add('show');
+    placeGhost(sx, sy);
+  }, 380);
 
-  const onMove = (ev) => {
+  function onMove(ev) {
     clearTimeout(timer);
-    if (!activated) return;
+    if (!active) return;
     ev.preventDefault();
-    const t = ev.touches[0];
-    positionGhost(t.clientX, t.clientY);
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const quad = el && el.closest('.quadrant');
-    highlightDrop(quad);
-  };
+    var t = ev.touches[0];
+    placeGhost(t.clientX, t.clientY);
+    document.querySelectorAll('.quad').forEach(function(q) { q.classList.remove('over'); });
+    var hit = document.elementFromPoint(t.clientX, t.clientY);
+    var quad = hit && hit.closest && hit.closest('.quad');
+    if (quad) quad.classList.add('over');
+  }
 
-  const onEnd = (ev) => {
+  function onEnd(ev) {
     clearTimeout(timer);
     document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend', onEnd);
-
-    ghost.classList.remove('visible');
-    if (!activated || !dragState) return;
-
-    const t = ev.changedTouches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const quad = el && el.closest('.quadrant');
-    if (quad) {
-      const q = quad.id.replace('drop-', '');
-      if (q !== getCurrentQuadrant(id)) {
-        moveTask(id, q);
-        showToast(`Verplaatst naar ${META[q]?.label || q}`);
-      }
-    }
-
+    document.removeEventListener('touchend',  onEnd);
+    ghost.classList.remove('show');
     item.classList.remove('dragging');
-    highlightDrop(null);
-    dragState = null;
-  };
+    document.querySelectorAll('.quad').forEach(function(q) { q.classList.remove('over'); });
+    if (!active) return;
+    var t   = ev.changedTouches[0];
+    var hit = document.elementFromPoint(t.clientX, t.clientY);
+    var quad = hit && hit.closest && hit.closest('.quad');
+    if (quad) {
+      var q = quad.id.slice(1);
+      var cur = tasks.find(function(t) { return t.id === id; });
+      if (cur && q !== cur.quadrant) { moveTask(id, q); toast('Verplaatst naar ' + (META[q] ? META[q].label : q)); }
+    }
+  }
 
   document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend', onEnd);
+  document.addEventListener('touchend',  onEnd);
 }
 
-function positionGhost(x, y) {
-  ghost.style.left = (x + 12) + 'px';
-  ghost.style.top  = (y - 20) + 'px';
+function placeGhost(x, y) {
+  ghost.style.left = (x + 14) + 'px';
+  ghost.style.top  = (y - 24) + 'px';
 }
 
-function highlightDrop(quad) {
-  document.querySelectorAll('.quadrant').forEach(q => q.classList.remove('drag-over'));
-  if (quad) quad.classList.add('drag-over');
-}
-
-function getCurrentQuadrant(id) {
-  const t = tasks.find(t => t.id === id);
-  return t ? t.quadrant : null;
-}
-
-/* ── Desktop drag & drop ── */
-document.querySelectorAll('.quadrant').forEach(q => {
-  q.addEventListener('dragover', e => { e.preventDefault(); q.classList.add('drag-over'); });
-  q.addEventListener('dragleave', () => q.classList.remove('drag-over'));
-  q.addEventListener('drop', e => {
-    e.preventDefault();
-    q.classList.remove('drag-over');
-    const id = e.dataTransfer.getData('text/plain');
-    if (id) moveTask(id, q.id.replace('drop-', ''));
-  });
-});
-
-document.addEventListener('dragstart', e => {
-  const item = e.target.closest('.task-item');
-  if (item) e.dataTransfer.setData('text/plain', item.dataset.id);
-});
-
-/* ── Service Worker ── */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
 }
 
-/* ── Init ── */
+// INIT
+if (getApiKey()) {
+  hideKeyScreen();
+} else {
+  showKeyScreen();
+}
 render();
 </script>
 </body>
